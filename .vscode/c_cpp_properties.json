@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/natoledo/ros2_ws/install/dynamixel_sdk_custom_interfaces/include/**",
+        "/home/natoledo/ros2_ws/install/dynamixel_sdk/include/**",
+        "/home/natoledo/ros2_ws/install/coco_interfaces/include/**",
+        "/home/natoledo/ros2_ws/install/coco_face_display/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/natoledo/ros2_ws/src/DynamixelSDK/dynamixel_sdk/include/**",
+        "/home/natoledo/ros2_ws/src/DynamixelSDK/dynamixel_sdk_examples/include/**",
+        "/home/natoledo/ros2_ws/src/coco/coco_face_display/include/**",
+        "/home/natoledo/ros2_ws/src/coco_arm_mimic/include/**",
+        "/home/natoledo/ros2_ws/src/coco_face_screen/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
