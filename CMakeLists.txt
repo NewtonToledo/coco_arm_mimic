@@ -35,6 +35,12 @@ find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 
 # Instalar el script Python
+
+install(PROGRAMS
+  scripts/csi_cam_pub.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(PROGRAMS
   scripts/body_points_detector.py
   DESTINATION lib/${PROJECT_NAME}

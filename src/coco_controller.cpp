@@ -1,16 +1,16 @@
 #include "coco_controller.hpp"
 
 DualArmTrajectoryController::DualArmTrajectoryController() : Node("body_trajectory_controller") {
-    joint_limits_["joint_4"] = std::make_pair(-0.78, 1.50);
-    joint_limits_["joint_5"] = std::make_pair(-0.01, 1.0);
-    joint_limits_["joint_6"] = std::make_pair(-0.4, 0.6);
-    joint_limits_["joint_7"] = std::make_pair(-0.86, 0.28);
-    
-    joint_limits_["joint_9"] = std::make_pair(-0.78, 1.50);
-    joint_limits_["joint_10"] = std::make_pair(-0.01, 1.0);
-    joint_limits_["joint_11"] = std::make_pair(-0.4, 0.6);
-    joint_limits_["joint_12"] = std::make_pair(-0.86, 0.28);
-    
+    joint_limits_["joint_4"] = std::pair<float, float>(-0.78, 1.50);
+    joint_limits_["joint_5"] = std::pair<float, float>(-0.01, 1.0);
+    joint_limits_["joint_6"] = std::pair<float, float>(-0.4, 0.6);
+    joint_limits_["joint_7"] = std::pair<float, float>(-0.86, 0.28);
+
+    joint_limits_["joint_9"] = std::pair<float, float>(-0.78, 1.50);
+    joint_limits_["joint_10"] = std::pair<float, float>(-0.01, 1.0);
+    joint_limits_["joint_11"] = std::pair<float, float>(-0.4, 0.6);
+    joint_limits_["joint_12"] = std::pair<float, float>(-0.86, 0.28);
+
     right_joints_ = {"joint_4", "joint_5", "joint_6", "joint_7"};
     left_joints_ = {"joint_9", "joint_10", "joint_11", "joint_12"};
     
@@ -21,11 +21,6 @@ DualArmTrajectoryController::DualArmTrajectoryController() : Node("body_trajecto
     
     trajectory_client_ = rclcpp_action::create_client<FollowJointTrajectory>(
         this, "/joint_trajectory_controller/follow_joint_trajectory");
-        
-    if (!trajectory_client_->wait_for_action_server(std::chrono::seconds(5))) {
-        RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting 5 seconds");
-        throw std::runtime_error("Action server not available");
-    }
     
     subscription_ = this->create_subscription<coco_interfaces::msg::BodyPosition>(
         "body_tracker", 10, 
@@ -33,13 +28,28 @@ DualArmTrajectoryController::DualArmTrajectoryController() : Node("body_trajecto
     
     timer_ = this->create_wall_timer(
         std::chrono::milliseconds(20), 
-        std::bind(&DualArmTrajectoryController::sendTrajectoryGoal, this));
+        std::bind(&DualArmTrajectoryController::sendTrajectoryGoal, this));    
+
+    if (!trajectory_client_->wait_for_action_server(std::chrono::seconds(10))) {
+        RCLCPP_WARN(this->get_logger(), "Action server not available after waiting 10 seconds");
+        //throw std::runtime_error("Action server not available");
+    }
+    else{
+        RCLCPP_INFO(this->get_logger(), "Action server available.");
+    }
+    /*
+    subscription_ = this->create_subscription<coco_interfaces::msg::BodyPosition>(
+        "body_tracker", 10, 
+        std::bind(&DualArmTrajectoryController::armTrackerCallback, this, std::placeholders::_1));
     
+    timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(20), 
+        std::bind(&DualArmTrajectoryController::sendTrajectoryGoal, this));
+    */
     all_joints_ = {
         "joint_1", "joint_2", "joint_3", "joint_4",
-        "joint_5", "joint_6", "joint_7", "joint_8",
-        "joint_9", "joint_10", "joint_11", "joint_12",
-        "joint_13"
+        "joint_5", "joint_6", "joint_7",
+        "joint_9", "joint_10", "joint_11", "joint_12"
     };
     
     new_data_available_ = false;
@@ -165,17 +175,17 @@ void DualArmTrajectoryController::sendTrajectoryGoal() {
         last_right_pos_["joint_5"],
         last_right_pos_["joint_6"],
         last_right_pos_["joint_7"],
-        0.0,               
+              
         last_left_pos_["joint_9"],
         last_left_pos_["joint_10"],
         last_left_pos_["joint_11"],
         last_left_pos_["joint_12"],
-        0.0               
+              
     };
     
     point.velocities.resize(point.positions.size(), 0.0);
     
-    point.time_from_start = rclcpp::Duration::from_seconds(0.8);
+    point.time_from_start = rclcpp::Duration::from_seconds(1.2);
     
     goal_msg.trajectory.points.push_back(point);
     
@@ -190,6 +200,7 @@ void DualArmTrajectoryController::sendTrajectoryGoal() {
         std::bind(&DualArmTrajectoryController::result_callback, this, std::placeholders::_1);
         
     RCLCPP_INFO(this->get_logger(), "Sending goal");
+
     trajectory_client_->async_send_goal(goal_msg, send_goal_options);
     
     new_data_available_ = false;
